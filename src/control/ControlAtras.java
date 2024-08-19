@@ -13,6 +13,7 @@ public class ControlAtras extends Thread {
     private String Objetivo;
     private ControlPrincipal ctrl;
     private String texto;
+    private String text = null;
 
     public void setReglas(Regla[] reglas) {
 
@@ -37,15 +38,18 @@ public class ControlAtras extends Thread {
     public String Razonamiento(String Objet) {
 
         for (String h : hechos) {
-            BaseDeConocimientos.add(h);
+            if(!BaseDeConocimientos.contains(h)){
+                BaseDeConocimientos.add(h);
+            }
+            
         }
 
-        String ObjetivoActual = new String();
-        int contador = 1;
-        String text = null;
+        
+        
+        
 
         try {
-            while (!ObjetivoActual.equals(Objet)) {
+            while (!BaseDeConocimientos.contains(Objet)) {
 
                 if (text == null) {
                     text = "BASE DE CONOCIMIENTO \n";
@@ -83,103 +87,156 @@ public class ControlAtras extends Thread {
 
                 }
 
-                for (int i = 0; i < rules.size(); i++) {
-
-                    int subindice = rules.get(i).getSubindice();
-                    String[] condiciones = rules.get(i).getCondiciones();
-                    String conclusion = rules.get(i).getConclusion();
-
-                    text += "R" + subindice + ": ";
-
-                    for (int j = 0; j < condiciones.length; j++) {
-                        if (j == condiciones.length - 1) {
-                            text += condiciones[j];
-                        } else {
-                            text += condiciones[j] + " y ";
-                        }
-                    }
-                    text += " entonces " + conclusion + "\n";
-
-                }
-
-                text += "Los antecedentes de R" + rules.getFirst().getSubindice() + ":\n";
-                String[] condiciones = rules.getFirst().getCondiciones();
-                for (int j = 0; j < condiciones.length; j++) {
-                    if (j == condiciones.length - 1) {
-                        text += condiciones[j];
-                    } else {
-                        text += condiciones[j] + " y ";
-                    }
-                }
-                for (int i = 0; i < condiciones.length; i++) {
-
-                int menorindice=10;
-
-
-                List<Integer> indices = new ArrayList<>();
-                for(String c : condiciones){
-                indices.add(Integer.parseInt(c.substring(1)));
-
-                        }
-
-                for(int ind : indices){
-                    if(ind<menorindice){
-                        menorindice=ind;
-                    }
-                    
-                }
-                
-                for (String ant : condiciones){
-                    String a = ant.substring(1);
-                    int valor = Integer.parseInt(a);
-                    if(valor == menorindice){
-                        text += "\nVamos primero con " + ant + "\n";
-                        if (BaseDeConocimientos.contains(ant)) {
-    
-                            text += ant + " se encuentra en la base de Conocimientos, por lo tanto "
-                                    + rules.getFirst().getConclusion()
-                                    + " es verdadero y se agrega a la Base de Conocimientos";
-                            if (!BaseDeConocimientos.contains(rules.getFirst().getConclusion())) {
-                                BaseDeConocimientos.add(rules.getFirst().getConclusion());
-                                break;
+                for (Regla rel : rules){
+                    int subindice = rel.getSubindice();
+                            String[] condi = rel.getCondiciones();
+                            String conclusion = rel.getConclusion();
+        
+                            text += "R" + subindice + ": ";
+        
+                            for (int j = 0; j < condi.length; j++) {
+                                if (j == condi.length - 1) {
+                                    text += condi[j];
+                                } else {
+                                    text += condi[j] + " y ";
+                                }
                             }
-    
-                        } else {
-                            text += ant + " no se encuentra en la Base de Conocimientos\n";
-                            text += ant + " se convierte en subobjetivo";
-                            Razonamiento(ant);
-                        }
-                     break;   
+                            text += " entonces " + conclusion + "\n";
+                }
+
+                if(rules.size()!=0){
+                    for(Regla r: rules){
+                       
+
+                        
+                        text+="Tomamos la siguiente regla:\n";
+                            int subindice = r.getSubindice();
+                            String[] condi = r.getCondiciones();
+                            String conclusion = r.getConclusion();
+        
+                            text += "R" + subindice + ": ";
+        
+                            for (int j = 0; j < condi.length; j++) {
+                                if (j == condi.length - 1) {
+                                    text += condi[j];
+                                } else {
+                                    text += condi[j] + " y ";
+                                }
+                            }
+                            text += " entonces " + conclusion + "\n";
+        
+                        
+                    if(rules.size()==0){
+                        text+="No hay reglas que cumplan eso, por lo tanto, pasamos a la otra condición";
+                        break;
                     }
-                    
+                        boolean bandera = false;
+        
+                        text += "Los antecedentes de R" + r.getSubindice() + ":\n";
+                        String[] condiciones = r.getCondiciones();
+                        for (int j = 0; j < condiciones.length; j++) {
+                            if (j == condiciones.length - 1) {
+                                text += condiciones[j];
+                            } else {
+                                text += condiciones[j] + " y ";
+                            }
+                        }
+                            for (int i = 0; i < condiciones.length; i++) {
+        
+                        int menorindice=10;
+        
+        
+                        List<Integer> indices = new ArrayList<>();
+                        for(String c : condiciones){
+                            if(c!=null){
+                                indices.add(Integer.parseInt(c.substring(1)));
+                            }
+                        
+        
+                                }
+                        int indice = -1;
+                        for(int ind : indices){
+                            if(ind<menorindice){
+                                menorindice=ind;
+                            }
+                            indice++;
+                            
+                        }
+        
+                        for (String ant : condiciones){
+                            String a = ant.substring(1);
+                            int valor = Integer.parseInt(a);
+                            if(valor == menorindice){
+                                text += "\nVamos con " + ant + "\n";
+                                if (BaseDeConocimientos.contains(ant)) {
+            
+                                    text += ant + " se encuentra en la base de Conocimientos, por lo tanto "
+                                            + r.getConclusion()
+                                            + " es verdadero y se agrega a la Base de Conocimientos\n";
+                                            
+                                    if (!BaseDeConocimientos.contains(r.getConclusion())) {
+                                        BaseDeConocimientos.add(r.getConclusion());
+                                        
+                                        break;
+                                    }
+                                    break;
+            
+                                } else {
+                                    text += ant + " no se encuentra en la Base de Conocimientos\n";
+                                    text += ant + " se convierte en subObjetivo";
+                                    Razonamiento(ant);
+                                    condiciones[indice] = null;
+                                    bandera=true;
+                                }
+                           
+                             
+                            }
+                            
+                        }
+                        
+                        if(bandera==true && condiciones[i] != null){
+                            text += "\nVamos con " + condiciones[i] + "\n";
+                            if (BaseDeConocimientos.contains(condiciones[i])) {
+        
+                                text += condiciones[i] + " se encuentra en la base de Conocimientos, por lo tanto "
+                                        + r.getConclusion()
+                                        + " es verdadero y se agrega a la Base de Conocimientos";
+        
+                                if (!BaseDeConocimientos.contains(r.getConclusion())) {
+                                    BaseDeConocimientos.add(r.getConclusion());
+                                    break;
+                                }
+                                break;
+        
+                            } else {
+                                text += condiciones[i] + " no se encuentra en la Base de Conocimientos\n";
+                                text += condiciones[i] + " se convierte en subObjetivo";
+                                Razonamiento(condiciones[i]);
+                                bandera=true;
+                                break;
+                                
+                            }
+                        }
+    
+                    }
+                    }
+
+                }else{
+                    text+="No hay reglas que cumplan eso, por lo tanto, pasamos a la otra condición";
+                    return null;
                 }
                 
 
-                    text += "\nVamos primero con " + condiciones[i] + "\n";
-                    if (BaseDeConocimientos.contains(condiciones[i])) {
-
-                        text += condiciones[i] + " se encuentra en la base de Conocimientos, por lo tanto "
-                                + rules.getFirst().getConclusion()
-                                + " es verdadero y se agrega a la Base de Conocimientos";
-                        if (!BaseDeConocimientos.contains(rules.getFirst().getConclusion())) {
-                            BaseDeConocimientos.add(rules.getFirst().getConclusion());
-                            break;
-                        }
-
-                    } else {
-                        text += condiciones[i] + " no se encuentra en la Base de Conocimientos\n";
-                        text += condiciones[i] + " se convierte en subobjetivo";
-                        Razonamiento(condiciones[i]);
-                    }
-                }
+                
 
                 this.texto = text;
-                break;
+            
             }
 
             if (BaseDeConocimientos.contains(this.Objetivo)) {
                 return "SE CUMPLIÓ EL OBJETIVO";
             } else {
+                
                 return null;
             }
 
@@ -188,7 +245,7 @@ public class ControlAtras extends Thread {
         }
     }
 
-    public void run() {
+    public synchronized void run() {
 
         String Obj = this.Razonamiento(this.Objetivo);
 

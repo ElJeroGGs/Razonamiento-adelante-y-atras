@@ -244,7 +244,7 @@ public class ControlAdelante extends Thread {
     
     }
 
-    public void run(){
+    public synchronized void run(){
 
         String Objeto = this.Razonamiento();
 
